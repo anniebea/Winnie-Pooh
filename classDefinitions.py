@@ -33,25 +33,6 @@ class Edge:
         print(f"{self.u.idx}-{self.v.idx} ; w={self.weight}")
 
 
-class Cycle:
-    idx: int
-    vertices: [Vertex]
-    edges: [Edge]
-    difficulty: int
-
-    def __init__(self, idx, vertices, graph):
-        self.idx = idx
-        self.vertices = vertices
-        self.difficulty = 0
-        for vdx, vertex in enumerate(vertices[:-1]):
-            for edge in graph.edges:
-                if vertex == edge.u and vertices[vdx + 1] == edge.v:
-                    self.difficulty += edge.weight
-            for edge in graph.edges:
-                if vertices[0] == edge.u and vertices[len(vertices) - 1] == edge.v:
-                    self.difficulty += edge.weight
-
-
 class Graph:
     vertexCount: int
     vertices: [Vertex]
@@ -149,6 +130,10 @@ class Graph:
                 # edge.u.visited = True
 
     def maximumSpanningTree(self):
+        """
+        Creates a maximum spanning tree.
+        Time complexity: 
+        """
         # include first vertex
         self.vertices[0].weight = None
         self.vertices[0].visited = True
@@ -173,6 +158,10 @@ class Graph:
                 self.maxSpanTree.append((maxSourceIdx, maxNeighbor.idx, maxNeighbor.weight))
 
     def getHoneyFromMST(self):
+        """
+        Adds all edges not in MST to the Honey edge collection.
+        Time complexity: O(e)
+        """
         self.honeyEdges = [edge for edge in self.edges
                            if (edge.u.idx, edge.v.idx, edge.weight) not in self.maxSpanTree
                            and (edge.v.idx, edge.u.idx, edge.weight) not in self.maxSpanTree]
@@ -184,7 +173,7 @@ class Graph:
         Print graph data in easily readable format.
 
         Time complexity: irrelevant - this function is not necessary for the algorithm,
-        it is only called during debugging.
+        it is only used for debugging.
         """
         print("-----------")
         print("GRAPH DATA")
