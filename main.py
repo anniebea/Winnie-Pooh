@@ -11,17 +11,43 @@ def loadData(file):
     return n, G
 
 
-def main(file):
+def outputHoneyData(file, G):
+    lines = [str(len(G.honeyEdges)) + "\t" + str(G.honeySum)]
+    for i, edge in enumerate(G.honeyEdges):
+        if i % 5 == 0:
+            lines.append("\n" + str(edge.u.idx) + "\t" + str(edge.v.idx))
+        else:
+            lines.append("\t\t" + str(edge.u.idx) + "\t" + str(edge.v.idx))
+    with open(file, 'w') as f:
+        f.writelines(lines)
+
+
+def main(infile, outfile):
     start_time = time.time()
-    n, G = loadData(file)
+    n, G = loadData(infile)
     G.preprocess()
     G.maximumSpanningTree()
     G.getHoneyFromMST()
-    G.print()
-    end_time = time.time()
-    print("Total time:", end_time - start_time)
+    # G.print()
+    outputHoneyData(outfile, G)
+    print(f"Time for file {infile}:", time.time() - start_time)
+
+
+def run3tests(outfiles):
+    for fileset in outfiles:
+        main(fileset[0], fileset[1])
 
 
 if __name__ == '__main__':
-    filename = 'Tests/test2.txt'
-    main(filename)
+    print("Testing Sample Graphs")
+    testFiles = [
+        ['Tests/test1.txt', 'Tests/outfile1.txt'],
+        ['Tests/test2.txt', 'Tests/outfile2.txt'],
+        ['Tests/test3.txt', 'Tests/outfile3.txt']
+    ]
+    run3tests(testFiles)
+
+    print("Testing self-made graph")
+    inf = 'Tests/test0.txt'
+    outf = 'Tests/outfile.txt'
+    main(inf, outf)
