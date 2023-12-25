@@ -1,6 +1,3 @@
-import time
-
-
 class Vertex:
     idx: int
     visited: bool
@@ -53,24 +50,29 @@ class Graph:
     def preprocess(self):
         """
         Prepare graph for further actions.
-        Time complexity:
+        Time complexity: O(vve)
+        (O(v)*O(ve)+O(e)+O(e))
         """
-        start_time = time.time()
-        print("START preprocessing")
         for i in range(len(self.vertices)):
             finished = self.removeBoringVertices()  # remove all vertices not part of cycles
             if finished is True:
                 break
         self.honeyPotNonPositiveEdges()
-        # self.getAdjacencyList()
+        # print(len(self.edges))
+        # self.edges = [edge for edge in self.edges if edge not in self.honeyEdges]
+        # for i in range(len(self.vertices)):
+        #     finished = self.removeBoringVertices()  # remove all vertices not part of cycles
+        #     if finished is True:
+        #         break
+        # print(len(self.edges))
         self.getAdjacencyMatrix()
-        end_time = time.time()
-        print("END preprocess in:", end_time - start_time)
 
     def removeBoringVertices(self):
         """
         Remove all vertices and their associated edges from graph if not part of cyclic paths.
-        Time complexity: O(ve+e)
+        Time complexity: O(ve)
+        (O(ve)+O(v)+O(e)+O(e))
+
         :return: whether no changes were made
         """
         deletable = []
@@ -113,7 +115,7 @@ class Graph:
         Creates adjacency matrix.
         Time complexity: O(e)
         """
-        self.adjacencyMatrix = [[None for i in range(self.vertexCount + 1)] for i in range(self.vertexCount + 1)]
+        self.adjacencyMatrix = [[None for _ in range(self.vertexCount + 1)] for _ in range(self.vertexCount + 1)]
         for edge in self.edges:
             self.adjacencyMatrix[edge.u.idx][edge.v.idx] = edge.weight
             self.adjacencyMatrix[edge.v.idx][edge.u.idx] = edge.weight
@@ -126,13 +128,11 @@ class Graph:
         for edge in self.edges:
             if edge.weight is not None and edge.weight <= 0:
                 self.honeyEdges.append(edge)
-                # edge.v.visited = True
-                # edge.u.visited = True
 
     def maximumSpanningTree(self):
         """
-        Creates a maximum spanning tree.
-        Time complexity: 
+        Computes the maximum spanning tree
+        Time complexity: O(v^3)
         """
         # include first vertex
         self.vertices[0].weight = None
@@ -155,16 +155,16 @@ class Graph:
             if maxNeighbor.weight != -20001:
                 maxNeighbor.visited = True
                 maxNeighbor.weight = self.adjacencyMatrix[maxSourceIdx][maxNeighbor.idx]
-                self.maxSpanTree.append((maxSourceIdx, maxNeighbor.idx, maxNeighbor.weight))
+                if maxSourceIdx < maxNeighbor.idx:
+                    self.maxSpanTree.append((maxSourceIdx, maxNeighbor.idx, maxNeighbor.weight))
+                else:
+                    self.maxSpanTree.append((maxNeighbor.idx, maxSourceIdx, maxNeighbor.weight))
 
     def getHoneyFromMST(self):
-        """
-        Adds all edges not in MST to the Honey edge collection.
-        Time complexity: O(e)
-        """
-        self.honeyEdges = [edge for edge in self.edges
-                           if (edge.u.idx, edge.v.idx, edge.weight) not in self.maxSpanTree
-                           and (edge.v.idx, edge.u.idx, edge.weight) not in self.maxSpanTree]
+        non_mst = [edge for edge in self.edges
+                   if (edge.u.idx, edge.v.idx, edge.weight) not in self.maxSpanTree
+                   and (edge.v.idx, edge.u.idx, edge.weight) not in self.maxSpanTree]
+        self.honeyEdges.extend([edge for edge in non_mst if edge not in self.honeyEdges])
         for edge in self.honeyEdges:
             self.honeySum += edge.weight
 
@@ -173,7 +173,7 @@ class Graph:
         Print graph data in easily readable format.
 
         Time complexity: irrelevant - this function is not necessary for the algorithm,
-        it is only used for debugging.
+        it is only called during debugging.
         """
         print("-----------")
         print("GRAPH DATA")
