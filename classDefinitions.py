@@ -51,28 +51,22 @@ class Graph:
         """
         Prepare graph for further actions.
         Time complexity: O(vve)
-        (O(v)*O(ve)+O(e)+O(e))
+        (O(e) + O(e) + O(v)*O(ve) + O(e))
         """
-        for i in range(len(self.vertices)):
-            finished = self.removeBoringVertices()  # remove all vertices not part of cycles
+        self.honeyPotNonPositiveEdges()
+        self.edges = [edge for edge in self.edges if edge not in self.honeyEdges]
+        for _ in self.vertices:
+            finished = self.removeBoringVertices()
             if finished is True:
                 break
-        self.honeyPotNonPositiveEdges()
-        # print(len(self.edges))
-        # self.edges = [edge for edge in self.edges if edge not in self.honeyEdges]
-        # for i in range(len(self.vertices)):
-        #     finished = self.removeBoringVertices()  # remove all vertices not part of cycles
-        #     if finished is True:
-        #         break
-        # print(len(self.edges))
         self.getAdjacencyMatrix()
 
     def removeBoringVertices(self):
         """
         Remove all vertices and their associated edges from graph if not part of cyclic paths.
         Time complexity: O(ve)
-        (O(ve)+O(v)+O(e)+O(e))
 
+        (O(v)*O(e) + O(v) + O(e) + O(e))
         :return: whether no changes were made
         """
         deletable = []
@@ -161,6 +155,10 @@ class Graph:
                     self.maxSpanTree.append((maxNeighbor.idx, maxSourceIdx, maxNeighbor.weight))
 
     def getHoneyFromMST(self):
+        """
+        Calculates the Honeypot edge total difficulty.
+        Time complexity: O(e)
+        """
         non_mst = [edge for edge in self.edges
                    if (edge.u.idx, edge.v.idx, edge.weight) not in self.maxSpanTree
                    and (edge.v.idx, edge.u.idx, edge.weight) not in self.maxSpanTree]
@@ -173,7 +171,7 @@ class Graph:
         Print graph data in easily readable format.
 
         Time complexity: irrelevant - this function is not necessary for the algorithm,
-        it is only called during debugging.
+        it is only called for debugging purposes.
         """
         print("-----------")
         print("GRAPH DATA")
