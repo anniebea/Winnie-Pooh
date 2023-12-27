@@ -1,4 +1,5 @@
 from classDefinitions import *
+import time
 
 
 def loadData(file):
